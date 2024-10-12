@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-utyu+4_#=3-*vg#u%i&wv34vdhl+++=7tn#ae*a-$67yrwq29k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['reddit.scottnelson.xyz', '127.0.0.1', 'localhost']
 
 
 # Application definition
