@@ -1,4 +1,5 @@
 ## Reddit Cleaner
+Short and simple form to use Reddit's API to clean old posts and comments.
 
 ### Dev
 Start up dev server
