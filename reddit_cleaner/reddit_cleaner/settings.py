@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-utyu+4_#=3-*vg#u%i&wv34vdhl+++=7tn#ae*a-$67yrwq29k
 DEBUG = True
 
 ALLOWED_HOSTS = ['reddit.scottnelson.xyz', '127.0.0.1', 'localhost']
-
+CSRF_TRUSTED_ORIGINS = ['https://reddit.scottnelson.xyz']
 
 # Application definition
 
