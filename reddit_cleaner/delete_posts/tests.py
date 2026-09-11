@@ -254,10 +254,10 @@ class FormTests(TestCase):
 
 class StartupRecoveryTests(TestCase):
     def test_interrupted_jobs_marked_failed_on_startup(self):
-        from django.apps import apps
+        from .startup import recover_interrupted_jobs
         running = CleanupJob.objects.create(status=CleanupJob.RUNNING, options={})
         done = CleanupJob.objects.create(status=CleanupJob.DONE, options={})
-        apps.get_app_config("delete_posts").ready()
+        self.assertEqual(recover_interrupted_jobs(), 1)
         running.refresh_from_db(); done.refresh_from_db()
         self.assertEqual(running.status, CleanupJob.FAILED)
         self.assertIn("restarted", running.error_message)
