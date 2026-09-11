@@ -1,0 +1,19 @@
+{% if form.non_field_errors %}<div class="msg error">{{ form.non_field_errors }}</div>{% endif %}
+{% if legacy %}
+<div class="grid2">
+  <label>Reddit username {{ form.reddit_username }}{{ form.reddit_username.errors }}</label>
+  <label>Client ID {{ form.client_id }}{{ form.client_id.errors }}</label>
+  <label>Client secret {{ form.client_secret }}{{ form.client_secret.errors }}</label>
+  <label>Reddit password {{ form.password }}{{ form.password.errors }}</label>
+</div>
+{% endif %}
+<div class="checks">
+  <label class="check">{{ form.delete_submissions }} Delete posts</label>
+  <label class="check">{{ form.delete_comments }} Delete comments</label>
+  <label class="check">{{ form.overwrite_first }} Overwrite text before deleting <span class="hint">so re-crawled archives get a placeholder instead of the original</span></label>
+</div>
+<div class="grid2">
+  <label>Keep anything newer than (days) {{ form.keep_days }}{{ form.keep_days.errors }}<span class="hint">blank = delete everything</span></label>
+  <label>Skip these subreddits {{ form.skip_subreddits }}{{ form.skip_subreddits.errors }}<span class="hint">comma-separated</span></label>
+</div>
+<label class="check confirm">{{ form.confirm }} I understand this cannot be undone{{ form.confirm.errors }}</label>

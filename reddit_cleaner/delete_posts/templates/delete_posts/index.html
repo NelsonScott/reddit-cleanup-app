@@ -1,108 +1,73 @@
-<head>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .form-container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 2rem;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 2rem;
-            color: #343a40;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-        .instructions {
-            background-color: #e9ecef;
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 1.5rem;
-        }
-        .instructions h5 {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #495057;
-        }
-        .instructions p {
-            font-size: 0.9rem;
-            color: #6c757d;
-        }
-        .btn-primary {
-            width: 100%;
-        }
-    </style>
-</head>
+{% extends "delete_posts/base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Wipe your Reddit history.</h1>
+  <p class="lede">Deletes every post and comment on your account, oldest to newest, with a dry run first so you can see the count before anything goes.</p>
+</section>
 
-<body>
-    {% if messages %}
-    <div class="container mt-3">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} mt-3" role="alert">
-                {{ message }}
-            </div>
-        {% endfor %}
+{% if oauth_enabled %}
+<section class="card">
+  {% if not logged_in_as %}
+    <h2>1. Sign in with Reddit</h2>
+    <p>You will be sent to reddit.com to approve this app. Your password never touches this site; Reddit hands back a token that we revoke when you sign out.</p>
+    <a class="btn primary" href="{% url 'oauth_start' %}">Sign in with Reddit</a>
+    <p class="small">Permissions asked for: <code>identity</code> (know who you are), <code>history</code> (list your posts), <code>edit</code> (overwrite and delete them), <code>read</code>.</p>
+  {% else %}
+    <h2>1. Signed in as u/{{ logged_in_as }}</h2>
+    <div class="row">Not you? <form method="post" action="{% url 'logout' %}" class="inline">{% csrf_token %}<button class="link" type="submit">Sign out</button></form></div>
+  {% endif %}
+</section>
+
+<section class="card {% if not logged_in_as %}muted{% endif %}">
+  <h2>2. Choose what to delete</h2>
+  <form method="post" action="{% url 'start' %}" id="options-form">
+    {% csrf_token %}
+    {% include "delete_posts/_options.html" with form=form %}
+    {% if preview %}
+    <div class="preview">
+      <h3>Dry run for u/{{ preview.username }}</h3>
+      <div class="stats">
+        <div><b>{{ preview.submissions }}</b><span>posts</span></div>
+        <div><b>{{ preview.comments }}</b><span>comments</span></div>
+        <div><b>{{ preview.skipped }}</b><span>kept by your filters</span></div>
+      </div>
+      {% if preview.sample %}
+      <p class="small">First few that would go:</p>
+      <ul class="sample">{% for s in preview.sample %}<li>{{ s }}</li>{% endfor %}</ul>
+      {% endif %}
     </div>
     {% endif %}
-
-    <div class="container mt-5">
-        <div class="form-container">
-            <!-- Updated title -->
-            <h2 class="display-6">Delete Reddit Content</h2>
-
-            <!-- Instructions section -->
-            <div class="instructions">
-                <h5>How to Use</h5>
-                <p>
-                    This app deletes all of your Reddit posts and comments automatically. 
-                    You'll need to provide your Reddit API credentials. Here's how to get started:
-                </p>
-                <ol>
-                    <li>Go to <a href="https://www.reddit.com/prefs/apps" target="_blank">Reddit API Apps</a> and create a new "app".</li>
-                    <li>Note down your <strong>Client ID</strong> and <strong>Client Secret</strong>.</li>
-                    <li>Fill in the form below with your Reddit credentials. This app stores <strong>nothing</strong> you input, and is <a href="https://github.com/NelsonScott/reddit-cleanup-app">open source.</a></li>
-                    <li>Once submitted, the app will delete all your posts and comments from Reddit.</li>
-                </ol>
-            </div>
-
-            <!-- Form -->
-            <form method="post">
-                {% csrf_token %}
-                
-                <div class="mb-3">
-                    <label for="reddit_username" class="form-label">Reddit Username</label>
-                    <input type="text" class="form-control" id="reddit_username" name="reddit_username" placeholder="Enter Reddit username" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="client_id" class="form-label">Client ID</label>
-                    <input type="text" class="form-control" id="client_id" name="client_id" placeholder="Enter Client ID" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="client_secret" class="form-label">Client Secret</label>
-                    <input type="text" class="form-control" id="client_secret" name="client_secret" placeholder="Enter Client Secret" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="user_agent" class="form-label">User Agent (Reddit App name)</label>
-                    <input type="text" class="form-control" id="user_agent" name="user_agent" placeholder="Enter User Agent" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-lg">Delete Content</button>
-            </form>
-        </div>
+    <div class="actions">
+      <button class="btn" type="submit" name="mode" value="dry_run" formaction="{% url 'preview' %}" {% if not logged_in_as %}disabled{% endif %}>Dry run (count only)</button>
+      <button class="btn danger" type="submit" name="mode" value="delete" {% if not logged_in_as %}disabled{% endif %}>Delete for real</button>
     </div>
-</body>
+  </form>
+</section>
+{% endif %}
+
+{% if password_enabled %}
+<section class="card">
+  <h2>{% if oauth_enabled %}Alternative: {% endif %}Use your own Reddit "script" app</h2>
+  <details {% if not oauth_enabled or legacy_form %}open{% endif %}>
+    <summary>Show the form</summary>
+    <ol class="steps">
+      <li>Go to <a href="https://www.reddit.com/prefs/apps" rel="noopener">reddit.com/prefs/apps</a>, create an app of type <b>script</b>. Any name and <code>http://localhost</code> as redirect URI.</li>
+      <li>Copy the <b>client ID</b> (under the app name) and the <b>secret</b>.</li>
+      <li>Reddit's password login does not work with two-factor auth enabled; turn 2FA off for the run, then back on.</li>
+    </ol>
+    <form method="post" action="{% url 'legacy' %}" autocomplete="off">
+      {% csrf_token %}
+      {% include "delete_posts/_options.html" with form=legacy_form|default:form legacy=1 %}
+      <div class="actions">
+        <button class="btn" type="submit" name="mode" value="dry_run">Dry run (count only)</button>
+        <button class="btn danger" type="submit" name="mode" value="delete">Delete for real</button>
+      </div>
+    </form>
+  </details>
+</section>
+{% endif %}
+
+{% if not oauth_enabled and not password_enabled %}
+<section class="card"><p>This instance is not configured yet. Set the <code>REDDIT_OAUTH_*</code> environment variables (see the README).</p></section>
+{% endif %}
+{% endblock %}

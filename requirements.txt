@@ -1,0 +1,4 @@
+django>=5.2,<6
+praw>=7.8
+gunicorn>=23
+whitenoise>=6.9

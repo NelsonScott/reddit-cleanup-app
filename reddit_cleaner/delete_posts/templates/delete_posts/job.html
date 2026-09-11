@@ -1,0 +1,21 @@
+{% extends "delete_posts/base.html" %}
+{% block title %}{% if job.dry_run %}Dry run{% else %}Deleting{% endif %} · Reddit Cleaner{% endblock %}
+{% block content %}
+<section class="card" id="job" data-status-url="{% url 'job_status' job.id %}" data-dry="{{ job.dry_run|yesno:'1,0' }}">
+  <h1 id="title">{% if job.dry_run %}Dry run{% else %}Deleting{% endif %}{% if job.reddit_username %} for u/{{ job.reddit_username }}{% endif %}</h1>
+  <p class="status-line"><span class="dot" id="dot"></span> <span id="status">{{ job.status }}</span> <span id="current" class="small"></span></p>
+  <div class="stats">
+    <div><b id="subs">{{ job.submissions_deleted }}</b><span>posts {% if job.dry_run %}would be deleted{% else %}deleted{% endif %}</span></div>
+    <div><b id="comms">{{ job.comments_deleted }}</b><span>comments {% if job.dry_run %}would be deleted{% else %}deleted{% endif %}</span></div>
+    <div><b id="skipped">{{ job.skipped }}</b><span>kept by filters</span></div>
+    <div><b id="errors">{{ job.errors }}</b><span>errors</span></div>
+  </div>
+  <p id="error" class="msg error hidden"></p>
+  <div class="actions">
+    <form method="post" action="{% url 'job_cancel' job.id %}" id="cancel-form">{% csrf_token %}<button class="btn" type="submit">Stop</button></form>
+    <a class="btn" href="{% url 'index' %}">Back</a>
+  </div>
+  <p class="small">You can close this tab; the job keeps running on the server. This page refreshes itself. Reddit's API is rate-limited, so large accounts take a while (roughly 60 items a minute).</p>
+</section>
+{% endblock %}
+{% block scripts %}{% load static %}<script src="{% static 'delete_posts/job.js' %}"></script>{% endblock %}

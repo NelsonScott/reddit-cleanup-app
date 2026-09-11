@@ -1,0 +1,35 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>{% block title %}Reddit Cleaner{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'delete_posts/style.css' %}">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="{% url 'index' %}"><span class="logo" aria-hidden="true">✂</span> Reddit Cleaner</a>
+  <nav>
+    {% if logged_in_as %}
+      <span class="who">u/{{ logged_in_as }}</span>
+      <form method="post" action="{% url 'logout' %}" class="inline">{% csrf_token %}<button class="link" type="submit">Sign out</button></form>
+    {% endif %}
+    <a href="https://github.com/NelsonScott/reddit-cleanup-app" rel="noopener">Source</a>
+  </nav>
+</header>
+<main>
+{% if messages %}
+  <div class="flash">
+  {% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}
+  </div>
+{% endif %}
+{% block content %}{% endblock %}
+</main>
+<footer>
+  <p>Nothing you enter is stored. Deletion runs through Reddit's official API and is permanent.
+  Reddit caps history listings at about 1,000 items each; very old accounts may need a second pass.</p>
+</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

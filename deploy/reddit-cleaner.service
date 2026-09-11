@@ -1,0 +1,32 @@
+# /etc/systemd/system/reddit-cleaner.service   (or ~/.config/systemd/user/ with the User= line removed)
+[Unit]
+Description=Reddit Cleaner (Django + gunicorn)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=reddit-cleaner
+Group=reddit-cleaner
+WorkingDirectory=/opt/reddit-cleanup-app/reddit_cleaner
+EnvironmentFile=/etc/reddit-cleaner.env
+ExecStartPre=/opt/reddit-cleanup-app/.venv/bin/python manage.py migrate --noinput
+ExecStartPre=/opt/reddit-cleanup-app/.venv/bin/python manage.py collectstatic --noinput
+ExecStart=/opt/reddit-cleanup-app/.venv/bin/gunicorn -c ../gunicorn.conf.py reddit_cleaner.wsgi:application
+Restart=on-failure
+RestartSec=5
+# hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/reddit-cleaner
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,11 @@
+[project]
+name = "reddit-cleaner"
+version = "2.0.0"
+description = "Delete your Reddit posts and comments through the official API, with OAuth login and a dry run."
+requires-python = ">=3.12"
+dependencies = [
+    "django>=5.2,<6",
+    "praw>=7.8",
+    "gunicorn>=23",
+    "whitenoise>=6.9",
+]
