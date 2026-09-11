@@ -250,3 +250,15 @@ class FormTests(TestCase):
         f = CleanupOptionsForm({"delete_comments": "on", "skip_subreddits": " r/Python, NYC ,, askreddit"})
         self.assertTrue(f.is_valid(), f.errors)
         self.assertEqual(f.to_options()["skip_subreddits"], ["askreddit", "nyc", "python"])
+
+
+class StartupRecoveryTests(TestCase):
+    def test_interrupted_jobs_marked_failed_on_startup(self):
+        from django.apps import apps
+        running = CleanupJob.objects.create(status=CleanupJob.RUNNING, options={})
+        done = CleanupJob.objects.create(status=CleanupJob.DONE, options={})
+        apps.get_app_config("delete_posts").ready()
+        running.refresh_from_db(); done.refresh_from_db()
+        self.assertEqual(running.status, CleanupJob.FAILED)
+        self.assertIn("restarted", running.error_message)
+        self.assertEqual(done.status, CleanupJob.DONE)
